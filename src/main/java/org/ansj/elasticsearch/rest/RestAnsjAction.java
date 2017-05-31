@@ -3,7 +3,6 @@ package org.ansj.elasticsearch.rest;
 import org.ansj.elasticsearch.action.AnsjAction;
 import org.ansj.elasticsearch.action.AnsjRequest;
 import org.elasticsearch.client.node.NodeClient;
-import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.rest.BaseRestHandler;
 import org.elasticsearch.rest.RestController;
@@ -19,7 +18,6 @@ import static org.elasticsearch.rest.RestRequest.Method.GET;
  */
 public class RestAnsjAction extends BaseRestHandler {
 
-    @Inject
     public RestAnsjAction(Settings settings, RestController controller) {
         super(settings);
         controller.registerHandler(GET, "/_ansj", this);
@@ -28,12 +26,8 @@ public class RestAnsjAction extends BaseRestHandler {
     @Override
     protected RestChannelConsumer prepareRequest(RestRequest request, NodeClient client) throws IOException {
         AnsjRequest ansjRequest = new AnsjRequest();
-        ansjRequest.text(request.param("text"));
-        if (request.hasParam("type")) {
-            ansjRequest.type(request.param("type"));
-        } else {
-            ansjRequest.type("index");
-        }
+
+        ansjRequest.asMap().putAll(request.params());
 
         return channel -> client.execute(AnsjAction.INSTANCE, ansjRequest, new RestToXContentListener<>(channel));
     }
